@@ -1,4 +1,4 @@
-﻿package TelegramBotApi;
+﻿package TelegaPi;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -31,6 +31,10 @@ requires
   rtl;
 
 contains
-  TPI.Client in 'C:\Users\maks4\Documents\Embarcadero\Studio\Projects\TelegaPi\TPI.Client.pas';
+  TelegaPi.Client in 'TelegaPi.Client.pas',
+  TelegaPi.Core.Types in 'TelegaPi.Core.Types.pas',
+  TelegaPi.Types in 'TelegaPi.Types.pas',
+  TelegaPi.Core.Methods in 'TelegaPi.Core.Methods.pas',
+  TelegaPi.Methods in 'TelegaPi.Methods.pas';
 
 end.

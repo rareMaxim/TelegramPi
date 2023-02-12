@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{30F3D539-14B7-458B-91D3-4D6E119FFE3D}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="TelegaPi.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Test\TelegaPi.Test.dproj">
+            <Dependencies>TelegaPi.dproj</Dependencies>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="TelegaPi">
+        <MSBuild Projects="TelegaPi.dproj"/>
+    </Target>
+    <Target Name="TelegaPi:Clean">
+        <MSBuild Projects="TelegaPi.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TelegaPi:Make">
+        <MSBuild Projects="TelegaPi.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="TelegaPi_Test" DependsOnTargets="TelegaPi">
+        <MSBuild Projects="Test\TelegaPi.Test.dproj"/>
+    </Target>
+    <Target Name="TelegaPi_Test:Clean" DependsOnTargets="TelegaPi:Clean">
+        <MSBuild Projects="Test\TelegaPi.Test.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TelegaPi_Test:Make" DependsOnTargets="TelegaPi:Make">
+        <MSBuild Projects="Test\TelegaPi.Test.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="TelegaPi;TelegaPi_Test"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="TelegaPi:Clean;TelegaPi_Test:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="TelegaPi:Make;TelegaPi_Test:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
