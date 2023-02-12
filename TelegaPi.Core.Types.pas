@@ -3,31 +3,10 @@
 interface
 
 uses
-  Citrus.JObject,
   System.JSON.Serializers,
   TelegaPi.Types;
 
 type
-  TTgResponse = class
-  private
-    [JsonName('ok')]
-    FIsOk: Boolean;
-    [JsonName('result')]
-    [JsonConverter(TJObjectConverter)]
-    FResult: TJObject;
-    [JsonName('error_code')]
-    FErrorCode: Integer;
-    [JsonName('description')]
-    FDescription: string;
-  public
-    constructor Create;
-    destructor Destroy; override;
-    property IsOk: Boolean read FIsOk write FIsOk;
-    property Result: TJObject read FResult write FResult;
-    property ErrorCode: Integer read FErrorCode write FErrorCode;
-    property Description: string read FDescription write FDescription;
-  end;
-
   TTgUser = class(TInterfacedObject, ItgUser)
   private
     [JsonName('can_join_groups')]
@@ -102,6 +81,7 @@ type
     FViaBot: TTgUser;
     [JsonName('edit_date')]
     FEditDate: Integer;
+    [JsonName('has_protected_content')]
     FHasProtectedContent: Boolean;
   public
     property MessageId: Int64 read FMessageId write FMessageId;
@@ -190,6 +170,7 @@ type
     FMyChatMember: TtgChatMemberUpdated;
     [JsonName('chat_member')]
     FChatMember: TtgChatMemberUpdated;
+    [JsonName('chat_join_request')]
     FChatJoinRequest: TtgChatJoinRequest;
     function GetCallbackQuery: TtgCallbackQuery;
     function GetChannelPost: TtgMessage;
@@ -261,18 +242,6 @@ end;
 function TTgUser.GetUsername: string;
 begin
   Result := FUsername;
-end;
-
-constructor TTgResponse.Create;
-begin
-  inherited Create;
-  FResult := TJObject.Create();
-end;
-
-destructor TTgResponse.Destroy;
-begin
-  FResult.Free;
-  inherited Destroy;
 end;
 
 constructor TtgUpdate.Create;
