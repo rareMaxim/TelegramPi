@@ -19,13 +19,12 @@ type
     function BuildMandarin(const AMethod: string): IMandarinExt;
     procedure InternExec<TR>(AResponse: TProc<TR, IHttpResponse>);
   public
-    constructor Create(AMandarin: TMandarinClientJson); virtual;
+    constructor Create(AMandarin: TMandarinClientJson; const AMethod: string); virtual;
     function GetMandarin: IMandarin;
   end;
 
   TtgGetMeMethod = class(TtgMethod<ItgUser>, ITgGetMeMethod)
   public
-    constructor Create(AMandarin: TMandarinClientJson); override;
     procedure Excecute(AResponse: TProc<ItgUser, IHttpResponse>);
   end;
 
@@ -34,22 +33,31 @@ type
     function SetOffset(const AOffset: Integer): ITgGetUpdatesMethod;
     function SetLimit(const ALimit: Integer): ITgGetUpdatesMethod;
     function SetTimeout(const ATimeout: Integer): ITgGetUpdatesMethod;
-    constructor Create(AMandarin: TMandarinClientJson); override;
     procedure Excecute(AResponse: TProc<TArray<ItgUpdate>, IHttpResponse>);
+  end;
+
+  TtgSendMessageMethod = class(TtgMethod<ItgSendMessageMethod>, ItgSendMessageMethod)
+  public
+    function SetChatId(const AChatId: Int64): ItgSendMessageMethod; overload;
+    function SetChatId(const AChatId: string): ItgSendMessageMethod; overload;
+    function SetMessageThreadId(const AMessageThreadId: Int64): ItgSendMessageMethod;
+    function SetText(const AText: string): ItgSendMessageMethod;
+    procedure Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
   end;
 
 implementation
 
 uses
-  System.JSON, Citrus.JObject, TelegaPi.Core.Types,
+  System.JSON, Citrus.JObject,
   System.Generics.Collections;
 
 { TtgMethod<T> }
 
-constructor TtgMethod<T>.Create(AMandarin: TMandarinClientJson);
+constructor TtgMethod<T>.Create(AMandarin: TMandarinClientJson; const AMethod: string);
 begin
   inherited Create;
   FClient := AMandarin;
+  FMandarin := BuildMandarin(AMethod);
 end;
 
 function TtgMethod<T>.GetMandarin: IMandarin;
@@ -85,12 +93,6 @@ begin
     .AddUrlSegment('METHOD_NAME', AMethod);
 end;
 
-constructor TtgGetMeMethod.Create(AMandarin: TMandarinClientJson);
-begin
-  inherited Create(AMandarin);
-  FMandarin := BuildMandarin('getMe');
-end;
-
 { TtgGetMeMethod }
 
 procedure TtgGetMeMethod.Excecute(AResponse: TProc<ItgUser, IHttpResponse>);
@@ -103,13 +105,6 @@ begin
 end;
 
 { TtgGetUpdatesMethod }
-
-constructor TtgGetUpdatesMethod.Create(AMandarin: TMandarinClientJson);
-begin
-  inherited Create(AMandarin);
-  FMandarin := BuildMandarin('getUpdates');
-end;
-
 procedure TtgGetUpdatesMethod.Excecute(AResponse: TProc<TArray<ItgUpdate>, IHttpResponse>);
 begin
   InternExec < TArray < TtgUpdate >> (
@@ -143,6 +138,40 @@ end;
 function TtgGetUpdatesMethod.SetTimeout(const ATimeout: Integer): ITgGetUpdatesMethod;
 begin
   GetMandarin.AddQueryParameter('timeout', ATimeout.ToString);
+  Result := Self;
+end;
+
+{ TtgSendMessageMethod }
+procedure TtgSendMessageMethod.Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
+begin
+  InternExec<TtgMessage>(
+    procedure(AData: TtgMessage; AHttp: IHttpResponse)
+    begin
+      AResponse(AData, AHttp);
+    end);
+end;
+
+function TtgSendMessageMethod.SetChatId(const AChatId: string): ItgSendMessageMethod;
+begin
+  GetMandarin.AddQueryParameter('chat_id', AChatId);
+  Result := Self;
+end;
+
+function TtgSendMessageMethod.SetMessageThreadId(const AMessageThreadId: Int64): ItgSendMessageMethod;
+begin
+  GetMandarin.AddQueryParameter('message_thread_id', AMessageThreadId.ToString);
+  Result := Self;
+end;
+
+function TtgSendMessageMethod.SetText(const AText: string): ItgSendMessageMethod;
+begin
+  GetMandarin.AddQueryParameter('text', AText);
+  Result := Self;
+end;
+
+function TtgSendMessageMethod.SetChatId(const AChatId: Int64): ItgSendMessageMethod;
+begin
+  GetMandarin.AddQueryParameter('chat_id', AChatId.ToString);
   Result := Self;
 end;
 

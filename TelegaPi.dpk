@@ -32,7 +32,6 @@ requires
 
 contains
   TelegaPi.Client in 'TelegaPi.Client.pas',
-  TelegaPi.Core.Types in 'TelegaPi.Core.Types.pas',
   TelegaPi.Types in 'TelegaPi.Types.pas',
   TelegaPi.Core.Methods in 'TelegaPi.Core.Methods.pas',
   TelegaPi.Methods in 'TelegaPi.Methods.pas';

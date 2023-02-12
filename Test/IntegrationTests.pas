@@ -26,9 +26,9 @@ type
 
     // Test with TestCase Attribute to supply parameters.
     [Test]
-    [TestCase('TestA', '1,2')]
-    [TestCase('TestB', '3,4')]
-    procedure Test2(const AValue1: Integer; const AValue2: Integer);
+    [TestCase('TestA', '245903278,Hello world!')]
+    //  [TestCase('TestB', '3,4')]
+    procedure SendMessage(const AId, AText: string);
   end;
 
 implementation
@@ -74,8 +74,16 @@ begin
     end);
 end;
 
-procedure TMyTestObject.Test2(const AValue1: Integer; const AValue2: Integer);
+procedure TMyTestObject.SendMessage(const AId, AText: string);
 begin
+  FBot.SendMessage//
+    .SetChatId(AId) //
+    .SetText(AText) //
+    .Excecute(
+    procedure(AMessage: ItgMessage; AHttp: IHTTPResponse)
+    begin
+      Assert.AreEqual(200, AHttp.StatusCode);
+    end);
 end;
 
 initialization

@@ -22,6 +22,7 @@ type
     destructor Destroy; override;
     function GetMe: ITgGetMeMethod;
     function GetUpdates: ITgGetUpdatesMethod;
+    function SendMessage: ItgSendMessageMethod;
   published
     property IsAsyncMode: Boolean read FIsAsyncMode write FIsAsyncMode;
     property Token: string read FToken write FToken;
@@ -55,12 +56,17 @@ end;
 
 function TTelegaPi.GetMe: ITgGetMeMethod;
 begin
-  Result := TtgGetMeMethod.Create(FMandarin);
+  Result := TtgGetMeMethod.Create(FMandarin, 'getMe');
 end;
 
 function TTelegaPi.GetUpdates: ITgGetUpdatesMethod;
 begin
-  Result := TtgGetUpdatesMethod.Create(FMandarin);
+  Result := TtgGetUpdatesMethod.Create(FMandarin, 'getUpdates');
+end;
+
+function TTelegaPi.SendMessage: ItgSendMessageMethod;
+begin
+  Result := TtgSendMessageMethod.Create(FMandarin, 'sendMessage');
 end;
 
 end.

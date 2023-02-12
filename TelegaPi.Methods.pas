@@ -23,6 +23,15 @@ type
     procedure Excecute(AResponse: TProc<TArray<ItgUpdate>, IHttpResponse>);
   end;
 
+  ItgSendMessageMethod = interface
+    ['{757408C1-EA70-4B8C-A5DA-24A3242C48B4}']
+    function SetChatId(const AChatId: Int64): ItgSendMessageMethod; overload;
+    function SetChatId(const AChatId: string): ItgSendMessageMethod; overload;
+    function SetMessageThreadId(const AMessageThreadId: Int64): ItgSendMessageMethod;
+    function SetText(const AText: string): ItgSendMessageMethod;
+    procedure Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
+  end;
+
 implementation
 
 end.
