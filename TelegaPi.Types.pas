@@ -59,8 +59,109 @@ type
     property Username: string read GetUsername;
   end;
 
-  TtgChat = class
+  TtgChatPhoto = class
 
+  end;
+
+  TtgMessage = class;
+
+  TtgChatPermissions = class
+
+  end;
+
+  TtgChatLocation = class
+
+  end;
+
+  TtgChat = class
+  private
+    [JsonName('id')]
+    FId: Int64;
+    [JsonName('type')]
+    FType: string;
+    [JsonName('title')]
+    FTitle: string;
+    [JsonName('username')]
+    FUsername: string;
+    [JsonName('first_name')]
+    FFirstName: string;
+    [JsonName('last_name')]
+    FLastName: string;
+    [JsonName('is_forum')]
+    FIsForum: Boolean;
+    [JsonName('photo')]
+    FPhoto: TtgChatPhoto;
+    [JsonName('active_usernames')]
+    FActiveUsernames: TArray<string>;
+    [JsonName('emoji_status_custom_emoji_id')]
+    FEmojiStatusCustomEmojiId: string;
+    [JsonName('bio')]
+    FBio: string;
+    [JsonName('has_private_forwards')]
+    FHasPrivateForwards: Boolean;
+    [JsonName('has_restricted_voice_and_video_messages')]
+    FHasRestrictedVoiceAndVideoMessages: Boolean;
+    [JsonName('join_to_send_messages')]
+    FJoinToSendMessages: Boolean;
+    [JsonName('join_by_request')]
+    FJoinByRequest: Boolean;
+    [JsonName('description')]
+    FDescription: string;
+    [JsonName('invite_link')]
+    FInviteLink: string;
+    [JsonName('pinned_message')]
+    FPinnedMessage: TtgMessage;
+    [JsonName('permissions')]
+    FPermissions: TtgChatPermissions;
+    [JsonName('slow_mode_delay')]
+    FSlowModeDelay: Integer;
+    [JsonName('message_auto_delete_time')]
+    FMessageAutoDeleteTime: Integer;
+    [JsonName('has_aggressive_anti_spam_enabled')]
+    FHasAggressiveAntiSpamEnabled: Boolean;
+    [JsonName('has_hidden_members')]
+    FHasHiddenMembers: Boolean;
+    [JsonName('has_protected_content')]
+    FHasProtectedContent: Boolean;
+    [JsonName('sticker_set_name')]
+    FStickerSetName: string;
+    [JsonName('can_set_sticker_set')]
+    FCanSetStickerSet: Boolean;
+    [JsonName('linked_chat_id')]
+    FLinkedChatId: Int64;
+    [JsonName('location')]
+    FLocation: TtgChatLocation;
+  public
+    property Id: Int64 read FId write FId;
+    property &Type: string read FType write FType;
+    property Title: string read FTitle write FTitle;
+    property Username: string read FUsername write FUsername;
+    property FirstName: string read FFirstName write FFirstName;
+    property LastName: string read FLastName write FLastName;
+    property IsForum: Boolean read FIsForum write FIsForum;
+    property Photo: TtgChatPhoto read FPhoto write FPhoto;
+    property ActiveUsernames: TArray<string> read FActiveUsernames write FActiveUsernames;
+    property EmojiStatusCustomEmojiId: string read FEmojiStatusCustomEmojiId write FEmojiStatusCustomEmojiId;
+    property Bio: string read FBio write FBio;
+    property HasPrivateForwards: Boolean read FHasPrivateForwards write FHasPrivateForwards;
+    property HasRestrictedVoiceAndVideoMessages: Boolean read FHasRestrictedVoiceAndVideoMessages
+      write FHasRestrictedVoiceAndVideoMessages;
+    property JoinToSendMessages: Boolean read FJoinToSendMessages write FJoinToSendMessages;
+    property JoinByRequest: Boolean read FJoinByRequest write FJoinByRequest;
+    property Description: string read FDescription write FDescription;
+    property InviteLink: string read FInviteLink write FInviteLink;
+    property PinnedMessage: TtgMessage read FPinnedMessage write FPinnedMessage;
+    property Permissions: TtgChatPermissions read FPermissions write FPermissions;
+    property SlowModeDelay: Integer read FSlowModeDelay write FSlowModeDelay;
+    property MessageAutoDeleteTime: Integer read FMessageAutoDeleteTime write FMessageAutoDeleteTime;
+    property HasAggressiveAntiSpamEnabled: Boolean read FHasAggressiveAntiSpamEnabled
+      write FHasAggressiveAntiSpamEnabled;
+    property HasHiddenMembers: Boolean read FHasHiddenMembers write FHasHiddenMembers;
+    property HasProtectedContent: Boolean read FHasProtectedContent write FHasProtectedContent;
+    property StickerSetName: string read FStickerSetName write FStickerSetName;
+    property CanSetStickerSet: Boolean read FCanSetStickerSet write FCanSetStickerSet;
+    property LinkedChatId: Int64 read FLinkedChatId write FLinkedChatId;
+    property Location: TtgChatLocation read FLocation write FLocation;
   end;
 
   TtgMessageEntity = class
@@ -241,8 +342,6 @@ type
     // public
     property UpdateId: Int64 read GetUpdateId;
   end;
-
-  TtgMessage = class;
 
   ItgMessage = interface
     ['{1EED92B5-35C2-4FDF-ACCF-16053DDBB9C0}']
