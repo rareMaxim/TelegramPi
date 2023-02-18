@@ -6,13 +6,14 @@ uses
   TelegaPi.Types, System.SysUtils, Citrus.Mandarin;
 
 type
-  ITgMethod<T> = interface
-    ['{5DDC21DC-FBF1-410D-9169-CC17A3903983}']
-  end;
-
-  ITgGetMeMethod = interface(ITgMethod<ItgUser>)
+  ITgGetMeMethod = interface
     ['{EE3B55AC-9138-4564-86E9-AE4F9FA04A24}']
     procedure Excecute(AResponse: TProc<ItgUser, IHttpResponse>);
+  end;
+
+  ITgLogOutMethod = interface
+    ['{DC9FAB1C-F2B2-4DCF-B92A-809AB3DECED2}']
+    procedure Excecute(AResponse: TProc<Boolean, IHttpResponse>);
   end;
 
   ITgGetUpdatesMethod = interface

@@ -9,7 +9,7 @@ uses
   TelegaPi.Types;
 
 type
-  TtgMethod<T> = class(TInterfacedObject, ITgMethod<T>)
+  TtgMethod = class(TInterfacedObject)
   private const
     BOT_URL = '{server}/bot{token}/{METHOD_NAME}'; // do not localize
   private
@@ -23,12 +23,16 @@ type
     function GetMandarin: IMandarin;
   end;
 
-  TtgGetMeMethod = class(TtgMethod<ItgUser>, ITgGetMeMethod)
+  TtgGetMeMethod = class(TtgMethod, ITgGetMeMethod)
   public
     procedure Excecute(AResponse: TProc<ItgUser, IHttpResponse>);
   end;
 
-  TtgGetUpdatesMethod = class(TtgMethod<ITgGetUpdatesMethod>, ITgGetUpdatesMethod)
+  TtgLogOutMethod = class(TtgMethod, ITgLogOutMethod)
+    procedure Excecute(AResponse: TProc<Boolean, IHttpResponse>);
+  end;
+
+  TtgGetUpdatesMethod = class(TtgMethod, ITgGetUpdatesMethod)
   public
     function SetOffset(const AOffset: Integer): ITgGetUpdatesMethod;
     function SetLimit(const ALimit: Integer): ITgGetUpdatesMethod;
@@ -36,7 +40,7 @@ type
     procedure Excecute(AResponse: TProc<TArray<ItgUpdate>, IHttpResponse>);
   end;
 
-  TtgSendMessageMethod = class(TtgMethod<ItgSendMessageMethod>, ItgSendMessageMethod)
+  TtgSendMessageMethod = class(TtgMethod, ItgSendMessageMethod)
   public
     function SetChatId(const AChatId: Int64): ItgSendMessageMethod; overload;
     function SetChatId(const AChatId: string): ItgSendMessageMethod; overload;
@@ -53,19 +57,19 @@ uses
 
 { TtgMethod<T> }
 
-constructor TtgMethod<T>.Create(AMandarin: TMandarinClientJson; const AMethod: string);
+constructor TtgMethod.Create(AMandarin: TMandarinClientJson; const AMethod: string);
 begin
   inherited Create;
   FClient := AMandarin;
   FMandarin := BuildMandarin(AMethod);
 end;
 
-function TtgMethod<T>.GetMandarin: IMandarin;
+function TtgMethod.GetMandarin: IMandarin;
 begin
   Result := FMandarin;
 end;
 
-procedure TtgMethod<T>.InternExec<TR>(AResponse: TProc<TR, IHttpResponse>);
+procedure TtgMethod.InternExec<TR>(AResponse: TProc<TR, IHttpResponse>);
 begin
   FClient.Execute(GetMandarin,
     procedure(AHttp: IHttpResponse)
@@ -87,7 +91,7 @@ begin
     end, True);
 end;
 
-function TtgMethod<T>.BuildMandarin(const AMethod: string): IMandarinExt;
+function TtgMethod.BuildMandarin(const AMethod: string): IMandarinExt;
 begin
   Result := FClient.NewMandarin(BOT_URL)//
     .AddUrlSegment('METHOD_NAME', AMethod);
@@ -173,6 +177,13 @@ function TtgSendMessageMethod.SetChatId(const AChatId: Int64): ItgSendMessageMet
 begin
   GetMandarin.AddQueryParameter('chat_id', AChatId.ToString);
   Result := Self;
+end;
+
+{ TtgLogOutMethod }
+
+procedure TtgLogOutMethod.Excecute(AResponse: TProc<Boolean, IHttpResponse>);
+begin
+  InternExec<Boolean>(AResponse);
 end;
 
 end.

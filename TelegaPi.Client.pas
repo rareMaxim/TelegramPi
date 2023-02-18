@@ -21,6 +21,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function GetMe: ITgGetMeMethod;
+    function LogOut: ITgLogOutMethod;
     function GetUpdates: ITgGetUpdatesMethod;
     function SendMessage: ItgSendMessageMethod;
   published
@@ -62,6 +63,11 @@ end;
 function TTelegaPi.GetUpdates: ITgGetUpdatesMethod;
 begin
   Result := TtgGetUpdatesMethod.Create(FMandarin, 'getUpdates');
+end;
+
+function TTelegaPi.LogOut: ITgLogOutMethod;
+begin
+  Result := TtgLogOutMethod.Create(FMandarin, 'logOut');
 end;
 
 function TTelegaPi.SendMessage: ItgSendMessageMethod;
