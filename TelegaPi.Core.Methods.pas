@@ -6,7 +6,8 @@ uses
   TelegaPi.Methods,
   Citrus.Mandarin,
   System.SysUtils,
-  TelegaPi.Types;
+  TelegaPi.Types,
+  TelegaPi.Core.Helpers;
 
 type
   TtgMethod = class(TInterfacedObject)
@@ -32,11 +33,16 @@ type
     procedure Excecute(AResponse: TProc<Boolean, IHttpResponse>);
   end;
 
+  TtgCloseMethod = class(TtgMethod, ITgCloseMethod)
+    procedure Excecute(AResponse: TProc<Boolean, IHttpResponse>);
+  end;
+
   TtgGetUpdatesMethod = class(TtgMethod, ITgGetUpdatesMethod)
   public
     function SetOffset(const AOffset: Integer): ITgGetUpdatesMethod;
     function SetLimit(const ALimit: Integer): ITgGetUpdatesMethod;
     function SetTimeout(const ATimeout: Integer): ITgGetUpdatesMethod;
+    function SetAllowedUpdates(AAllowedUpdates: TAllowedUpdates): ITgGetUpdatesMethod;
     procedure Excecute(AResponse: TProc<TArray<ItgUpdate>, IHttpResponse>);
   end;
 
@@ -46,13 +52,15 @@ type
     function SetChatId(const AChatId: string): ItgSendMessageMethod; overload;
     function SetMessageThreadId(const AMessageThreadId: Int64): ItgSendMessageMethod;
     function SetText(const AText: string): ItgSendMessageMethod;
+    function SetParseMode(const AParseMode: string): ItgSendMessageMethod;
     procedure Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
   end;
 
 implementation
 
 uses
-  System.JSON, Citrus.JObject,
+  System.JSON,
+  Citrus.JObject,
   System.Generics.Collections;
 
 { TtgMethod<T> }
@@ -81,9 +89,15 @@ begin
       LResponse := TJSONObject.ParseJSONValue(LRawData) as TJSONObject;
       try
         if LResponse.GetValue('ok').Value = 'true' then
-          AResponse(TJObjectConfig.Current.Serializer.Deserialize<TR>(LResponse.GetValue('result').ToJSON), AHttp)
+        begin
+          var
+          LNewData := LResponse.GetValue('result').ToJSON;
+          var
+          LSerialized := TJObjectConfig.Current.Serializer.Deserialize<TR>(LNewData);
+          AResponse(LSerialized, AHttp);
+        end
         else
-          raise Exception.CreateFmt('%s: %d = %s', [FMandarin.GetUrlSegment('METHOD_NAME'),
+          raise Exception.CreateFmt('%s: %s = %s', [FMandarin.GetUrlSegment('METHOD_NAME'),
             LResponse.GetValue('error_code').Value, LResponse.GetValue('description').Value]);
       finally
         LResponse.Free;
@@ -114,17 +128,19 @@ begin
   InternExec < TArray < TtgUpdate >> (
     procedure(AData: TArray<TtgUpdate>; AHttp: IHttpResponse)
     var
-      LUpdates: TList<ItgUpdate>;
+      LUpdates: TArray<ItgUpdate>;
     begin
-      LUpdates := TList<ItgUpdate>.Create;
-      try
-        for var LUpdate in AData do
-          LUpdates.Add(LUpdate);
-        AResponse(LUpdates.ToArray, AHttp);
-      finally
-        LUpdates.Free;
-      end;
+      SetLength(LUpdates, length(AData));
+      for var i := Low(AData) to High(AData) do
+        LUpdates[i] := AData[i];
+      AResponse(LUpdates, AHttp);
     end);
+end;
+
+function TtgGetUpdatesMethod.SetAllowedUpdates(AAllowedUpdates: TAllowedUpdates): ITgGetUpdatesMethod;
+begin
+  GetMandarin.AddQueryParameter('allowed_updates', AAllowedUpdates.ToString);
+  Result := Self;
 end;
 
 function TtgGetUpdatesMethod.SetLimit(const ALimit: Integer): ITgGetUpdatesMethod;
@@ -157,31 +173,44 @@ end;
 
 function TtgSendMessageMethod.SetChatId(const AChatId: string): ItgSendMessageMethod;
 begin
-  GetMandarin.AddQueryParameter('chat_id', AChatId);
+  GetMandarin.Body.AddJsonPair('chat_id', AChatId);
   Result := Self;
 end;
 
 function TtgSendMessageMethod.SetMessageThreadId(const AMessageThreadId: Int64): ItgSendMessageMethod;
 begin
-  GetMandarin.AddQueryParameter('message_thread_id', AMessageThreadId.ToString);
+  GetMandarin.Body.AddJsonPair('message_thread_id', AMessageThreadId.ToString);
+  Result := Self;
+end;
+
+function TtgSendMessageMethod.SetParseMode(const AParseMode: string): ItgSendMessageMethod;
+begin
+  GetMandarin.Body.AddJsonPair('parse_mode', AParseMode);
   Result := Self;
 end;
 
 function TtgSendMessageMethod.SetText(const AText: string): ItgSendMessageMethod;
 begin
-  GetMandarin.AddQueryParameter('text', AText);
+  GetMandarin.Body.AddJsonPair('text', AText);
   Result := Self;
 end;
 
 function TtgSendMessageMethod.SetChatId(const AChatId: Int64): ItgSendMessageMethod;
 begin
-  GetMandarin.AddQueryParameter('chat_id', AChatId.ToString);
+  GetMandarin.Body.AddJsonPair('chat_id', AChatId.ToString);
   Result := Self;
 end;
 
 { TtgLogOutMethod }
 
 procedure TtgLogOutMethod.Excecute(AResponse: TProc<Boolean, IHttpResponse>);
+begin
+  InternExec<Boolean>(AResponse);
+end;
+
+{ TtgCloseMethod }
+
+procedure TtgCloseMethod.Excecute(AResponse: TProc<Boolean, IHttpResponse>);
 begin
   InternExec<Boolean>(AResponse);
 end;

@@ -6,6 +6,78 @@ uses
   System.JSON.Serializers;
 
 type
+{$SCOPEDENUMS ON}
+  /// <summary>
+  /// The type of an Update
+  /// </summary>
+  TtgUpdateType = (
+    /// <summary>
+    /// Update Type is unknown
+    /// </summary>
+    UnknownUpdate = 0,
+
+    /// <summary>
+    /// The <see cref="Update" /> contains a <see cref="Message" />.
+    /// </summary>
+    MessageUpdate,
+
+    /// <summary>
+    /// The <see cref="Update" /> contains an edited <see cref="Message" />
+    /// </summary>
+    EditedMessage,
+    /// <summary>
+    /// The <see cref="Update" /> contains a channel post <see cref="Message" />
+    /// </summary>
+    ChannelPost,
+    /// <summary>
+    /// The <see cref="Update" /> contains an edited channel post <see cref="Message" />
+    /// </summary>
+    EditedChannelPost,
+    /// <summary>
+    /// The <see cref="Update" /> contains an <see cref="InlineQuery" />.
+    /// </summary>
+    InlineQueryUpdate,
+
+    /// <summary>
+    /// The <see cref="Update" /> contains a <see cref="ChosenInlineResult" />
+    /// </summary>
+    ChosenInlineResultUpdate,
+
+    /// <summary>
+    /// The <see cref="Update" /> contins a <see cref="CallbackQuery" />
+    /// </summary>
+    CallbackQueryUpdate,
+
+    /// <summary>
+    /// The <see cref="Update" /> contains an <see cref="ShippingQueryUpdate" />
+    /// </summary>
+    ShippingQueryUpdate,
+
+    /// <summary>
+    /// The <see cref="Update" /> contains an <see cref="PreCheckoutQueryUpdate" />
+    /// </summary>
+    PreCheckoutQueryUpdate,
+    //
+    Pool,
+    //
+    PollAnswer,
+    //
+    MyChatMember,
+    //
+    ChatMember,
+    //
+    ChatJoinRequest,
+
+    /// <summary>
+    /// Receive all <see cref="Update" /> Types
+    /// </summary>
+    All = 255);
+
+  TAllowedUpdate = (message, Edited_message, Channel_post, Edited_channel_post, Inline_query, Chosen_inline_result,
+    Callback_query);
+  TAllowedUpdates = set of TAllowedUpdate;
+
+{$SCOPEDENUMS OFF}
 
   ItgUser = interface
     ['{33BF51DB-F10F-4408-9E64-82E56AB870FE}']
@@ -338,9 +410,38 @@ type
 
   ItgUpdate = interface
     ['{66946DBE-B901-4080-8D31-FDB08BD5DA9A}']
+    function GetCallbackQuery: TtgCallbackQuery;
+    function GetChannelPost: TtgMessage;
+    function GetChatJoinRequest: TtgChatJoinRequest;
+    function GetChatMember: TtgChatMemberUpdated;
+    function GetChosenInlineResult: TtgChosenInlineResult;
+    function GetEditedChannelPost: TtgMessage;
+    function GetEditedMessage: TtgMessage;
+    function GetInlineQuery: TtgInlineQuery;
+    function GetMessage: TtgMessage;
+    function GetMyChatMember: TtgChatMemberUpdated;
+    function GetPoll: TtgPoll;
+    function GetPollAnswer: TtgPollAnswer;
+    function GetPreCheckoutQuery: TtgPreCheckoutQuery;
+    function GetShippingQuery: TtgShippingQuery;
     function GetUpdateId: Int64;
-    // public
+    //  public
+    function GetType: TtgUpdateType;
     property UpdateId: Int64 read GetUpdateId;
+    property Message: TtgMessage read GetMessage;
+    property EditedMessage: TtgMessage read GetEditedMessage;
+    property ChannelPost: TtgMessage read GetChannelPost;
+    property EditedChannelPost: TtgMessage read GetEditedChannelPost;
+    property InlineQuery: TtgInlineQuery read GetInlineQuery;
+    property ChosenInlineResult: TtgChosenInlineResult read GetChosenInlineResult;
+    property CallbackQuery: TtgCallbackQuery read GetCallbackQuery;
+    property ShippingQuery: TtgShippingQuery read GetShippingQuery;
+    property PreCheckoutQuery: TtgPreCheckoutQuery read GetPreCheckoutQuery;
+    property Poll: TtgPoll read GetPoll;
+    property PollAnswer: TtgPollAnswer read GetPollAnswer;
+    property MyChatMember: TtgChatMemberUpdated read GetMyChatMember;
+    property ChatMember: TtgChatMemberUpdated read GetChatMember;
+    property ChatJoinRequest: TtgChatJoinRequest read GetChatJoinRequest;
   end;
 
   ItgMessage = interface
@@ -833,6 +934,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+    function GetType: TtgUpdateType;
     property UpdateId: Int64 read GetUpdateId;
     property Message: TtgMessage read GetMessage;
     property EditedMessage: TtgMessage read GetEditedMessage;
@@ -848,10 +950,12 @@ type
     property MyChatMember: TtgChatMemberUpdated read GetMyChatMember;
     property ChatMember: TtgChatMemberUpdated read GetChatMember;
     property ChatJoinRequest: TtgChatJoinRequest read GetChatJoinRequest;
-
   end;
 
 implementation
+
+uses
+  System.SysUtils;
 
 function TTgUser.GetCanJoinGroups: Boolean;
 begin
@@ -891,38 +995,52 @@ end;
 constructor TtgUpdate.Create;
 begin
   inherited Create;
-  FMessage := TtgMessage.Create();
-  FEditedMessage := TtgMessage.Create();
-  FChannelPost := TtgMessage.Create();
-  FEditedChannelPost := TtgMessage.Create();
-  FInlineQuery := TtgInlineQuery.Create();
-  FChosenInlineResult := TtgChosenInlineResult.Create();
-  FCallbackQuery := TtgCallbackQuery.Create();
-  FShippingQuery := TtgShippingQuery.Create();
-  FPreCheckoutQuery := TtgPreCheckoutQuery.Create();
-  FPoll := TtgPoll.Create();
-  FPollAnswer := TtgPollAnswer.Create();
-  FMyChatMember := TtgChatMemberUpdated.Create();
-  FChatMember := TtgChatMemberUpdated.Create();
-  FChatJoinRequest := TtgChatJoinRequest.Create();
+  FMessage := nil;
+  FEditedMessage := nil;
+  FChannelPost := nil;
+  FEditedChannelPost := nil;
+  FInlineQuery := nil;
+  FChosenInlineResult := nil;
+  FCallbackQuery := nil;
+  FShippingQuery := nil;
+  FPreCheckoutQuery := nil;
+  FPoll := nil;
+  FPollAnswer := nil;
+  FMyChatMember := nil;
+  FChatMember := nil;
+  FChatJoinRequest := nil;
 end;
 
 destructor TtgUpdate.Destroy;
 begin
-  FChatJoinRequest.Free;
-  FChatMember.Free;
-  FMyChatMember.Free;
-  FPollAnswer.Free;
-  FPoll.Free;
-  FPreCheckoutQuery.Free;
-  FShippingQuery.Free;
-  FCallbackQuery.Free;
-  FChosenInlineResult.Free;
-  FInlineQuery.Free;
-  FEditedChannelPost.Free;
-  FChannelPost.Free;
-  FEditedMessage.Free;
-  FMessage.Free;
+  if Assigned(FChatJoinRequest) then
+    FreeAndNil(FChatJoinRequest);
+  if Assigned(FChatMember) then
+    FreeAndNil(FChatMember);
+  if Assigned(FMyChatMember) then
+    FreeAndNil(FMyChatMember);
+  if Assigned(FPollAnswer) then
+    FreeAndNil(FPollAnswer);
+  if Assigned(FPoll) then
+    FreeAndNil(FPoll);
+  if Assigned(FPreCheckoutQuery) then
+    FreeAndNil(FPreCheckoutQuery);
+  if Assigned(FShippingQuery) then
+    FreeAndNil(FShippingQuery);
+  if Assigned(FCallbackQuery) then
+    FreeAndNil(FCallbackQuery);
+  if Assigned(FChosenInlineResult) then
+    FreeAndNil(FChosenInlineResult);
+  if Assigned(FInlineQuery) then
+    FreeAndNil(FInlineQuery);
+  if Assigned(FEditedChannelPost) then
+    FreeAndNil(FEditedChannelPost);
+  if Assigned(FChannelPost) then
+    FreeAndNil(FChannelPost);
+  if Assigned(FEditedMessage) then
+    FreeAndNil(FEditedMessage);
+  if Assigned(FMessage) then
+    FreeAndNil(FMessage);
   inherited Destroy;
 end;
 
@@ -994,6 +1112,30 @@ end;
 function TtgUpdate.GetShippingQuery: TtgShippingQuery;
 begin
   Result := FShippingQuery;
+end;
+
+function TtgUpdate.GetType: TtgUpdateType;
+begin
+  if CallbackQuery <> nil then
+    Result := TtgUpdateType.CallbackQueryUpdate
+  else if ChannelPost <> nil then
+    Result := TtgUpdateType.ChannelPost
+  else if ChosenInlineResult <> nil then
+    Result := TtgUpdateType.ChosenInlineResultUpdate
+  else if EditedChannelPost <> nil then
+    Result := TtgUpdateType.EditedChannelPost
+  else if EditedMessage <> nil then
+    Result := TtgUpdateType.EditedMessage
+  else if InlineQuery <> nil then
+    Result := TtgUpdateType.InlineQueryUpdate
+  else if Message <> nil then
+    Result := TtgUpdateType.MessageUpdate
+  else if PreCheckoutQuery <> nil then
+    Result := TtgUpdateType.PreCheckoutQueryUpdate
+  else if ShippingQuery <> nil then
+    Result := TtgUpdateType.ShippingQueryUpdate
+  else
+    Result := TtgUpdateType.UnknownUpdate;
 end;
 
 function TtgUpdate.GetUpdateId: Int64;

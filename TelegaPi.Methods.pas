@@ -16,11 +16,17 @@ type
     procedure Excecute(AResponse: TProc<Boolean, IHttpResponse>);
   end;
 
+  ITgCloseMethod = interface
+    ['{BDB1E3E8-D8D7-48E6-AD89-E41EE83EB5DA}']
+    procedure Excecute(AResponse: TProc<Boolean, IHttpResponse>);
+  end;
+
   ITgGetUpdatesMethod = interface
     ['{1DE30710-09ED-4F56-9752-0E9D1D36FBD8}']
     function SetOffset(const AOffset: Integer): ITgGetUpdatesMethod;
     function SetLimit(const ALimit: Integer): ITgGetUpdatesMethod;
     function SetTimeout(const ATimeout: Integer): ITgGetUpdatesMethod;
+    function SetAllowedUpdates(AAllowedUpdates: TAllowedUpdates): ITgGetUpdatesMethod;
     procedure Excecute(AResponse: TProc<TArray<ItgUpdate>, IHttpResponse>);
   end;
 
@@ -30,6 +36,7 @@ type
     function SetChatId(const AChatId: string): ItgSendMessageMethod; overload;
     function SetMessageThreadId(const AMessageThreadId: Int64): ItgSendMessageMethod;
     function SetText(const AText: string): ItgSendMessageMethod;
+
     procedure Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
   end;
 

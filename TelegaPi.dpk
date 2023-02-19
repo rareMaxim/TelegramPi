@@ -34,6 +34,7 @@ contains
   TelegaPi.Client in 'TelegaPi.Client.pas',
   TelegaPi.Types in 'TelegaPi.Types.pas',
   TelegaPi.Core.Methods in 'TelegaPi.Core.Methods.pas',
-  TelegaPi.Methods in 'TelegaPi.Methods.pas';
+  TelegaPi.Methods in 'TelegaPi.Methods.pas',
+  TelegaPi.Core.Helpers in 'TelegaPi.Core.Helpers.pas';
 
 end.

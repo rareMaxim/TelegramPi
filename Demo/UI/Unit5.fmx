@@ -1,0 +1,35 @@
+object Form5: TForm5
+  Left = 0
+  Top = 0
+  Caption = 'Form5'
+  ClientHeight = 480
+  ClientWidth = 640
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object Memo1: TMemo
+    Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+    DataDetectorTypes = []
+    Position.X = 8.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 265.000000000000000000
+    Size.Height = 473.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    Viewport.Width = 261.000000000000000000
+    Viewport.Height = 469.000000000000000000
+  end
+  object TelegaPi1: TTelegaPi
+    IsAsyncMode = True
+    Token = '494720781:AAHCESGawcyIaJRPjzZJBytVUa7XlPA2Q0c'
+    Server = 'https://api.telegram.org'
+    MessageOffset = 0
+    AllowedUpdates = []
+    LimitUpdates = 0
+    OnMessage = TelegaPi1Message
+    Left = 328
+    Top = 120
+  end
+end
