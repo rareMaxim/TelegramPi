@@ -36,7 +36,14 @@ type
     function SetChatId(const AChatId: string): ItgSendMessageMethod; overload;
     function SetMessageThreadId(const AMessageThreadId: Int64): ItgSendMessageMethod;
     function SetText(const AText: string): ItgSendMessageMethod;
-
+    function SetParseMode(const AParseMode: string): ItgSendMessageMethod;
+    function SetEntities(const AEntities: TArray<TtgMessageEntity>): ItgSendMessageMethod;
+    function SetDisableWebPagePreview(const ADisableWebPagePreview: Boolean): ItgSendMessageMethod;
+    function SetDisableNotification(const ADisableNotification: Boolean): ItgSendMessageMethod;
+    function SetProtectContent(const AProtectContent: Boolean): ItgSendMessageMethod;
+    function SetReplyToMessageId(const AMessageId: Int64): ItgSendMessageMethod;
+    function SetAllowSendingWithoutReply(const AAllowSendingWithoutReply: Boolean): ItgSendMessageMethod;
+    function ReplyMarkup(const AKeyboard: string): ItgSendMessageMethod;
     procedure Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
   end;
 

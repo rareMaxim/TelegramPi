@@ -29,7 +29,7 @@ object Form5: TForm5
     AllowedUpdates = []
     LimitUpdates = 0
     OnMessage = TelegaPi1Message
-    Left = 328
-    Top = 120
+    Left = 344
+    Top = 168
   end
 end

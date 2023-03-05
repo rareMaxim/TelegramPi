@@ -105,6 +105,7 @@ type
     procedure DoOnUpdate(AUpdate: TtgUpdate); override;
     procedure DoOnUpdates(AUpdates: TArray<ItgUpdate>); override;
   public
+{$REGION 'Events|Події'}
     property OnCallbackQuery: TProc<TtgCallbackQuery> read FOnCallbackQuery write FOnCallbackQuery;
     property OnChannelPost: TProc<ITgMessage> read FOnChannelPost write FOnChannelPost;
     property OnChosenInlineResult: TProc<TtgChosenInlineResult> read FOnChosenInlineResult write FOnChosenInlineResult;
@@ -116,6 +117,7 @@ type
     property OnShippingQuery: TProc<TtgShippingQuery> read FOnShippingQuery write FOnShippingQuery;
     property OnUpdate: TProc<ItgUpdate> read FOnUpdate write FOnUpdate;
     property OnUpdates: TProc < TArray < ItgUpdate >> read FOnUpdates write FOnUpdates;
+{$ENDREGION}
   end;
 
   TtgOnUpdate = procedure(ASender: TObject; AUpdate: TtgUpdate) of object;
@@ -165,7 +167,7 @@ type
     procedure DoOnUpdate(AUpdate: TtgUpdate); override;
     procedure DoOnUpdates(AUpdates: TArray<ItgUpdate>); override;
   published
-{$REGION 'Events|События'}
+{$REGION 'Events|Події'}
     /// <summary>
     /// <para>
     /// Событие возникает когда получено <see cref="TelegAPi.Types|TtgUpdate" />
@@ -262,18 +264,22 @@ begin
     begin
       AMandarin.AddUrlSegment('server', FServer); // do not localize
       AMandarin.AddUrlSegment('token', FToken); // do not localize
-      AMandarin.AddHeader('Content-Type', 'application/json');
     end;
   FServer := 'https://api.telegram.org';
   FTimer := TThreadTimer.Create(
     procedure
     begin
       // FTimer.Stop; // Timer pause
-      GetUpdates//
-        .SetOffset(FMessageOffset)//
-        .SetAllowedUpdates(FAllowedUpdates)//
-        .SetLimit(FLimitUpdates)//
-        .Excecute(DoWorkWithUpdates);
+      with GetUpdates do
+      begin
+        if FMessageOffset > 0 then
+          SetOffset(FMessageOffset);
+        if AllowedUpdates <> [] then
+          SetAllowedUpdates(FAllowedUpdates);
+        if FLimitUpdates > 0 then
+          SetLimit(FLimitUpdates);
+        Excecute(DoWorkWithUpdates);
+      end;
 
     end);
   FTimer.Interval := 1000;

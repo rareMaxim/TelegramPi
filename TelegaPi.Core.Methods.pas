@@ -53,12 +53,20 @@ type
     function SetMessageThreadId(const AMessageThreadId: Int64): ItgSendMessageMethod;
     function SetText(const AText: string): ItgSendMessageMethod;
     function SetParseMode(const AParseMode: string): ItgSendMessageMethod;
+    function SetEntities(const AEntities: TArray<TtgMessageEntity>): ItgSendMessageMethod;
+    function SetDisableWebPagePreview(const ADisableWebPagePreview: Boolean): ItgSendMessageMethod;
+    function SetDisableNotification(const ADisableNotification: Boolean): ItgSendMessageMethod;
+    function SetProtectContent(const AProtectContent: Boolean): ItgSendMessageMethod;
+    function SetReplyToMessageId(const AMessageId: Int64): ItgSendMessageMethod;
+    function SetAllowSendingWithoutReply(const AAllowSendingWithoutReply: Boolean): ItgSendMessageMethod;
+    function ReplyMarkup(const AKeyboard: string): ItgSendMessageMethod;
     procedure Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
   end;
 
 implementation
 
 uses
+  FMX.Types,
   System.JSON,
   Citrus.JObject,
   System.Generics.Collections;
@@ -139,25 +147,25 @@ end;
 
 function TtgGetUpdatesMethod.SetAllowedUpdates(AAllowedUpdates: TAllowedUpdates): ITgGetUpdatesMethod;
 begin
-  GetMandarin.AddQueryParameter('allowed_updates', AAllowedUpdates.ToString);
+  GetMandarin.Body.JSON.AddPair('allowed_updates', AAllowedUpdates.ToString);
   Result := Self;
 end;
 
 function TtgGetUpdatesMethod.SetLimit(const ALimit: Integer): ITgGetUpdatesMethod;
 begin
-  GetMandarin.AddQueryParameter('limit', ALimit.ToString);
+  GetMandarin.Body.JSON.AddPair('limit', ALimit.ToString);
   Result := Self;
 end;
 
 function TtgGetUpdatesMethod.SetOffset(const AOffset: Integer): ITgGetUpdatesMethod;
 begin
-  GetMandarin.AddQueryParameter('offset', AOffset.ToString);
+  GetMandarin.Body.JSON.AddPair('offset', AOffset.ToString);
   Result := Self;
 end;
 
 function TtgGetUpdatesMethod.SetTimeout(const ATimeout: Integer): ITgGetUpdatesMethod;
 begin
-  GetMandarin.AddQueryParameter('timeout', ATimeout.ToString);
+  GetMandarin.Body.JSON.AddPair('timeout', ATimeout.ToString);
   Result := Self;
 end;
 
@@ -167,37 +175,81 @@ begin
   InternExec<TtgMessage>(
     procedure(AData: TtgMessage; AHttp: IHttpResponse)
     begin
-      AResponse(AData, AHttp);
+      if Assigned(AResponse) then
+        AResponse(AData, AHttp)
+      else
+        AData.Free;
     end);
+end;
+
+function TtgSendMessageMethod.ReplyMarkup(const AKeyboard: string): ItgSendMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('reply_markup', TJSONObject.ParseJSONValue(AKeyboard));
+  Result := Self;
+end;
+
+function TtgSendMessageMethod.SetAllowSendingWithoutReply(const AAllowSendingWithoutReply: Boolean)
+  : ItgSendMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('allow_sending_without_reply', AAllowSendingWithoutReply.ToString(TUseBoolStrs.True));
+  Result := Self;
 end;
 
 function TtgSendMessageMethod.SetChatId(const AChatId: string): ItgSendMessageMethod;
 begin
-  GetMandarin.Body.AddJsonPair('chat_id', AChatId);
+  GetMandarin.Body.JSON.AddPair('chat_id', AChatId);
   Result := Self;
+end;
+
+function TtgSendMessageMethod.SetDisableNotification(const ADisableNotification: Boolean): ItgSendMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('disable_notification', ADisableNotification.ToString(TUseBoolStrs.True));
+  Result := Self;
+end;
+
+function TtgSendMessageMethod.SetDisableWebPagePreview(const ADisableWebPagePreview: Boolean): ItgSendMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('disable_web_page_preview', ADisableWebPagePreview.ToString(TUseBoolStrs.True));
+  Result := Self;
+end;
+
+function TtgSendMessageMethod.SetEntities(const AEntities: TArray<TtgMessageEntity>): ItgSendMessageMethod;
+begin
+  raise ENotImplemented.Create('TtgSendMessageMethod.SetEntities');
 end;
 
 function TtgSendMessageMethod.SetMessageThreadId(const AMessageThreadId: Int64): ItgSendMessageMethod;
 begin
-  GetMandarin.Body.AddJsonPair('message_thread_id', AMessageThreadId.ToString);
+  GetMandarin.Body.JSON.AddPair('message_thread_id', AMessageThreadId.ToString);
   Result := Self;
 end;
 
 function TtgSendMessageMethod.SetParseMode(const AParseMode: string): ItgSendMessageMethod;
 begin
-  GetMandarin.Body.AddJsonPair('parse_mode', AParseMode);
+  GetMandarin.Body.JSON.AddPair('parse_mode', AParseMode);
   Result := Self;
+end;
+
+function TtgSendMessageMethod.SetProtectContent(const AProtectContent: Boolean): ItgSendMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('protect_content', AProtectContent.ToString(TUseBoolStrs.True));
+  Result := Self;
+end;
+
+function TtgSendMessageMethod.SetReplyToMessageId(const AMessageId: Int64): ItgSendMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('reply_to_message_id', AMessageId.ToString);
 end;
 
 function TtgSendMessageMethod.SetText(const AText: string): ItgSendMessageMethod;
 begin
-  GetMandarin.Body.AddJsonPair('text', AText);
+  GetMandarin.Body.JSON.AddPair('text', AText);
   Result := Self;
 end;
 
 function TtgSendMessageMethod.SetChatId(const AChatId: Int64): ItgSendMessageMethod;
 begin
-  GetMandarin.Body.AddJsonPair('chat_id', AChatId.ToString);
+  GetMandarin.Body.JSON.AddPair('chat_id', AChatId.ToString);
   Result := Self;
 end;
 

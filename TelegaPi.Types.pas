@@ -1158,6 +1158,11 @@ begin
   FChat.Free;
   FSenderChat.Free;
   FFrom.Free;
+  FReplyMarkup.Free;
+  FContact.Free;
+  FForwardFrom.Free;
+  FForwardFromChat.Free;
+  FReplyToMessage.Free;
   inherited Destroy;
 end;
 
