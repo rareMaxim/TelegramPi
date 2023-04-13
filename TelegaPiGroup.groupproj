@@ -12,9 +12,6 @@
         <Projects Include="Test\TelegaPi.Test.dproj">
             <Dependencies>TelegaPi.dproj</Dependencies>
         </Projects>
-        <Projects Include="Demo\UI\Project5.dproj">
-            <Dependencies>Citrus\CitrusCE.dproj;TelegaPi.dproj</Dependencies>
-        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -50,23 +47,14 @@
     <Target Name="TelegaPi_Test:Make" DependsOnTargets="TelegaPi:Make">
         <MSBuild Projects="Test\TelegaPi.Test.dproj" Targets="Make"/>
     </Target>
-    <Target Name="Project5" DependsOnTargets="CitrusCE;TelegaPi">
-        <MSBuild Projects="Demo\UI\Project5.dproj"/>
-    </Target>
-    <Target Name="Project5:Clean" DependsOnTargets="CitrusCE:Clean;TelegaPi:Clean">
-        <MSBuild Projects="Demo\UI\Project5.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="Project5:Make" DependsOnTargets="CitrusCE:Make;TelegaPi:Make">
-        <MSBuild Projects="Demo\UI\Project5.dproj" Targets="Make"/>
-    </Target>
     <Target Name="Build">
-        <CallTarget Targets="CitrusCE;TelegaPi;TelegaPi_Test;Project5"/>
+        <CallTarget Targets="CitrusCE;TelegaPi;TelegaPi_Test"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="CitrusCE:Clean;TelegaPi:Clean;TelegaPi_Test:Clean;Project5:Clean"/>
+        <CallTarget Targets="CitrusCE:Clean;TelegaPi:Clean;TelegaPi_Test:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="CitrusCE:Make;TelegaPi:Make;TelegaPi_Test:Make;Project5:Make"/>
+        <CallTarget Targets="CitrusCE:Make;TelegaPi:Make;TelegaPi_Test:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

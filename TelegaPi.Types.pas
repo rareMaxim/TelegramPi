@@ -3,7 +3,8 @@
 interface
 
 uses
-  System.JSON.Serializers;
+  Citrus.Json.Converters,
+  System.Json.Serializers;
 
 type
 {$SCOPEDENUMS ON}
@@ -425,7 +426,7 @@ type
     function GetPreCheckoutQuery: TtgPreCheckoutQuery;
     function GetShippingQuery: TtgShippingQuery;
     function GetUpdateId: Int64;
-    //  public
+    // public
     function GetType: TtgUpdateType;
     property UpdateId: Int64 read GetUpdateId;
     property Message: TtgMessage read GetMessage;
@@ -456,7 +457,7 @@ type
     function GetChatShared: TtgChatShared;
     function GetConnectedWebsite: string;
     function GetContact: TtgContact;
-    function GetDate: Integer;
+    function GetDate: TDateTime;
     function GetDeleteChatPhoto: Boolean;
     function GetDice: TtgDice;
     function GetDocument: TtgDocument;
@@ -517,13 +518,13 @@ type
     function GetVoice: TtgVoice;
     function GetWebAppData: TtgWebAppData;
     function GetWriteAccessAllowed: TtgWriteAccessAllowed;
-    //  public
+    // public
 
     property MessageId: Int64 read GetMessageId;
     property MessageThreadId: Int64 read GetMessageThreadId;
     property From: TTgUser read GetFrom;
     property SenderChat: TtgChat read GetSenderChat;
-    property Date: Integer read GetDate;
+    property Date: TDateTime read GetDate;
     property Chat: TtgChat read GetChat;
     property ForwardFrom: TTgUser read GetForwardFrom;
     property ForwardFromChat: TtgChat read GetForwardFromChat;
@@ -603,7 +604,8 @@ type
     [JsonName('sender_chat')]
     FSenderChat: TtgChat;
     [JsonName('date')]
-    FDate: Integer;
+    [JsonConverter(TJsonUnixTimeConverter)]
+    FDate: TDateTime;
     [JsonName('chat')]
     FChat: TtgChat;
     [JsonName('forward_from')]
@@ -746,7 +748,7 @@ type
     function GetChatShared: TtgChatShared;
     function GetConnectedWebsite: string;
     function GetContact: TtgContact;
-    function GetDate: Integer;
+    function GetDate: TDateTime;
     function GetDeleteChatPhoto: Boolean;
     function GetDice: TtgDice;
     function GetDocument: TtgDocument;
@@ -815,7 +817,7 @@ type
     property MessageThreadId: Int64 read GetMessageThreadId;
     property From: TTgUser read GetFrom;
     property SenderChat: TtgChat read GetSenderChat;
-    property Date: Integer read GetDate;
+    property Date: TDateTime read GetDate;
     property Chat: TtgChat read GetChat;
     property ForwardFrom: TTgUser read GetForwardFrom;
     property ForwardFromChat: TtgChat read GetForwardFromChat;
@@ -1013,6 +1015,8 @@ end;
 
 destructor TtgUpdate.Destroy;
 begin
+  // if Assigned(FMessage) then
+  // FreeAndNil(FMessage);
   if Assigned(FChatJoinRequest) then
     FreeAndNil(FChatJoinRequest);
   if Assigned(FChatMember) then
@@ -1039,8 +1043,7 @@ begin
     FreeAndNil(FChannelPost);
   if Assigned(FEditedMessage) then
     FreeAndNil(FEditedMessage);
-  if Assigned(FMessage) then
-    FreeAndNil(FMessage);
+
   inherited Destroy;
 end;
 
@@ -1146,23 +1149,39 @@ end;
 constructor TtgMessage.Create;
 begin
   inherited Create;
-  FFrom := TTgUser.Create();
-  FSenderChat := TtgChat.Create();
-  FChat := TtgChat.Create();
+  SetLength(FEntities, 0);
+  FChat := nil;
+  FSenderChat := nil;
+  FFrom := nil;
+  FContact := nil;
+  FForwardFrom := nil;
+  FForwardFromChat := nil;
+  FReplyToMessage := nil;
+  FLocation := nil;
 end;
 
 destructor TtgMessage.Destroy;
 begin
   for var LEntity in FEntities do
     LEntity.Free;
-  FChat.Free;
-  FSenderChat.Free;
-  FFrom.Free;
-  FReplyMarkup.Free;
-  FContact.Free;
-  FForwardFrom.Free;
-  FForwardFromChat.Free;
-  FReplyToMessage.Free;
+  if Assigned(FChat) then
+    FreeAndNil(FChat);
+  if Assigned(FSenderChat) then
+    FreeAndNil(FSenderChat);
+  if Assigned(FFrom) then
+    FreeAndNil(FFrom);
+  if Assigned(FReplyMarkup) then
+    FreeAndNil(FReplyMarkup);
+  if Assigned(FContact) then
+    FreeAndNil(FContact);
+  if Assigned(FForwardFrom) then
+    FreeAndNil(FForwardFrom);
+  if Assigned(FForwardFromChat) then
+    FreeAndNil(FForwardFromChat);
+  if Assigned(FReplyToMessage) then
+    FreeAndNil(FReplyToMessage);
+  if Assigned(FLocation) then
+    FreeAndNil(FLocation);
   inherited Destroy;
 end;
 
@@ -1216,7 +1235,7 @@ begin
   Result := FContact;
 end;
 
-function TtgMessage.GetDate: Integer;
+function TtgMessage.GetDate: TDateTime;
 begin
   Result := FDate;
 end;

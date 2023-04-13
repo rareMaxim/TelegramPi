@@ -9,7 +9,8 @@ uses
   System.SysUtils,
   TelegaPi.Types,
   TelegaPi.Methods,
-  System.Net.HttpClient;
+  System.Net.HttpClient,
+  Citrus.SimpleLog;
 
 type
   TTelegaPiBase = class(TComponent)
@@ -38,6 +39,7 @@ type
     procedure DoOnEditedChannelPost(AEditedChannelPost: TTgMessage); virtual; abstract;
     procedure DoOnShippingQuery(AShippingQuery: TtgShippingQuery); virtual; abstract;
     procedure DoOnPreCheckoutQuery(APreCheckoutQuery: TtgPreCheckoutQuery); virtual; abstract;
+    procedure DoOnLogMessage(ALogMessage: TLogInfo); virtual; abstract;
   public
     procedure Start;
     procedure Stop;
@@ -70,6 +72,8 @@ type
     /// Use this method to send text messages. On success, the sent Message is returned.
     /// </summary>
     function SendMessage: ItgSendMessageMethod;
+
+    function ForwardMessage: ItgForwardMessageMethod;
   published
     property IsAsyncMode: Boolean read FIsAsyncMode write FIsAsyncMode;
     property Token: string read FToken write FToken;
@@ -92,6 +96,7 @@ type
     FOnEditedMessage: TProc<ITgMessage>;
     FOnShippingQuery: TProc<TtgShippingQuery>;
     FOnPreCheckoutQuery: TProc<TtgPreCheckoutQuery>;
+    FOnLogMessage: TProc<TLogInfo>;
   protected
     procedure DoOnCallbackQuery(ACallbackQuery: TtgCallbackQuery); override;
     procedure DoOnChannelPost(AChannelPost: TTgMessage); override;
@@ -104,6 +109,7 @@ type
     procedure DoOnShippingQuery(AShippingQuery: TtgShippingQuery); override;
     procedure DoOnUpdate(AUpdate: TtgUpdate); override;
     procedure DoOnUpdates(AUpdates: TArray<ItgUpdate>); override;
+    procedure DoOnLogMessage(ALogMessage: TLogInfo); override;
   public
 {$REGION 'Events|Події'}
     property OnCallbackQuery: TProc<TtgCallbackQuery> read FOnCallbackQuery write FOnCallbackQuery;
@@ -117,25 +123,21 @@ type
     property OnShippingQuery: TProc<TtgShippingQuery> read FOnShippingQuery write FOnShippingQuery;
     property OnUpdate: TProc<ItgUpdate> read FOnUpdate write FOnUpdate;
     property OnUpdates: TProc < TArray < ItgUpdate >> read FOnUpdates write FOnUpdates;
+    property OnLogMessage: TProc<TLogInfo> read FOnLogMessage write FOnLogMessage;
 {$ENDREGION}
   end;
 
   TtgOnUpdate = procedure(ASender: TObject; AUpdate: TtgUpdate) of object;
-
   TtgOnUpdates = procedure(ASender: TObject; AUpdates: TArray<ItgUpdate>) of object;
-
   TtgOnMessage = procedure(ASender: TObject; AMessage: TTgMessage) of object;
-
   TtgOnInlineQuery = procedure(ASender: TObject; AInlineQuery: TtgInlineQuery) of object;
-
   TtgOnInlineResultChosen = procedure(ASender: TObject; AChosenInlineResult: TtgChosenInlineResult) of object;
-
   TtgOnCallbackQuery = procedure(ASender: TObject; ACallbackQuery: TtgCallbackQuery) of object;
-
   TtgOnChannelPost = procedure(ASender: TObject; AChanelPost: TTgMessage) of object;
   TtgOnShippingQuery = procedure(ASender: TObject; AShippingQuery: TtgShippingQuery) of object;
   TtgOnChosenInlineResult = procedure(ASender: TObject; AChosenInlineResult: TtgChosenInlineResult) of object;
   TtgOnEditedChannelPost = procedure(ASender: TObject; AEditedChannelPost: TTgMessage) of object;
+  TtgOnLogMessage = procedure(ASender: TObject; ALogInfo: TLogInfo) of object;
 
   TTelegaPi = class(TTelegaPiBase)
   private
@@ -151,7 +153,7 @@ type
     FOnChosenInlineResult: TtgOnChosenInlineResult;
     FOnEditedChannelPost: TtgOnEditedChannelPost;
     FOnEditedMessage: TtgOnMessage;
-
+    FOnLogMessage: TtgOnLogMessage;
   protected
     procedure EventParser(AUpdates: TArray<ItgUpdate>); override;
   protected
@@ -166,6 +168,7 @@ type
     procedure DoOnShippingQuery(AShippingQuery: TtgShippingQuery); override;
     procedure DoOnUpdate(AUpdate: TtgUpdate); override;
     procedure DoOnUpdates(AUpdates: TArray<ItgUpdate>); override;
+    procedure DoOnLogMessage(ALogMessage: TLogInfo); override;
   published
 {$REGION 'Events|Події'}
     /// <summary>
@@ -234,6 +237,7 @@ type
     property OnChosenInlineResult: TtgOnChosenInlineResult read FOnChosenInlineResult write FOnChosenInlineResult;
     property OnEditedChannelPost: TtgOnEditedChannelPost read FOnEditedChannelPost write FOnEditedChannelPost;
     property OnEditedMessage: TtgOnMessage read FOnEditedMessage write FOnEditedMessage;
+    property OnLogMessage: TtgOnLogMessage read FOnLogMessage write FOnLogMessage;
 {$ENDREGION}
   end;
 
@@ -249,7 +253,7 @@ begin
   RegisterComponents('Telegram', [TTelegaPi]);
 end;
 
-{TTelegaPiBase }
+{ TTelegaPiBase }
 function TTelegaPiBase.Close: ITgCloseMethod;
 begin
   Result := TtgCloseMethod.Create(FMandarin, 'close');
@@ -264,6 +268,10 @@ begin
     begin
       AMandarin.AddUrlSegment('server', FServer); // do not localize
       AMandarin.AddUrlSegment('token', FToken); // do not localize
+    end;
+  FMandarin.OnLog := procedure(ALog: TLogInfo)
+    begin
+      DoOnLogMessage(ALog);
     end;
   FServer := 'https://api.telegram.org';
   FTimer := TThreadTimer.Create(
@@ -280,7 +288,6 @@ begin
           SetLimit(FLimitUpdates);
         Excecute(DoWorkWithUpdates);
       end;
-
     end);
   FTimer.Interval := 1000;
 end;
@@ -298,8 +305,8 @@ begin
   begin
     EventParser(AUpdates);
     FMessageOffset := AUpdates[High(AUpdates)].UpdateID + 1;
-    {Timer continue}
-    //  FTimer.Start;
+    { Timer continue }
+    // FTimer.Start;
   end;
 end;
 
@@ -311,6 +318,11 @@ begin
     DoOnUpdate(LUpdate as TtgUpdate);
     TypeUpdate(LUpdate as TtgUpdate);
   end;
+end;
+
+function TTelegaPiBase.ForwardMessage: ItgForwardMessageMethod;
+begin
+  Result := TtgForwardMessageMethod.Create(FMandarin, 'forwardMessage');
 end;
 
 function TTelegaPiBase.GetMe: ITgGetMeMethod;
@@ -373,7 +385,7 @@ begin
     TtgUpdateType.PreCheckoutQueryUpdate:
       DoOnPreCheckoutQuery(AUpdate.PreCheckoutQuery);
   else
-    raise EArgumentOutOfRangeException.Create('Unknown Event Type');
+    DoOnLogMessage(TLogInfo.Error('Unknown message event', 'TelegaPi Client'))
   end;
 end;
 
@@ -419,6 +431,12 @@ begin
   inherited;
   if Assigned(OnInlineQuery) then
     OnInlineQuery(AInlineQuery);
+end;
+
+procedure TTelegaPiConsole.DoOnLogMessage(ALogMessage: TLogInfo);
+begin
+  if Assigned(OnLogMessage) then
+    OnLogMessage(ALogMessage);
 end;
 
 procedure TTelegaPiConsole.DoOnMessage(AMessage: TTgMessage);
@@ -500,6 +518,12 @@ begin
     OnInlineQuery(Self, AInlineQuery);
 end;
 
+procedure TTelegaPi.DoOnLogMessage(ALogMessage: TLogInfo);
+begin
+  if Assigned(OnLogMessage) then
+    OnLogMessage(Self, ALogMessage);
+end;
+
 procedure TTelegaPi.DoOnMessage(AMessage: TTgMessage);
 begin
   inherited;
@@ -510,8 +534,8 @@ end;
 procedure TTelegaPi.DoOnPreCheckoutQuery(APreCheckoutQuery: TtgPreCheckoutQuery);
 begin
   inherited;
-  //  if Assigned(OnPreCheckoutQuery) then
-  //    OnPreCheckoutQuery(APreCheckoutQuery);
+  // if Assigned(OnPreCheckoutQuery) then
+  // OnPreCheckoutQuery(APreCheckoutQuery);
 end;
 
 procedure TTelegaPi.DoOnShippingQuery(AShippingQuery: TtgShippingQuery);

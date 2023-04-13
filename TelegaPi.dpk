@@ -28,7 +28,8 @@
 {$IMPLICITBUILD ON}
 
 requires
-  rtl;
+  rtl,
+  fmx;
 
 contains
   TelegaPi.Client in 'TelegaPi.Client.pas',

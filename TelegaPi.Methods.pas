@@ -47,6 +47,20 @@ type
     procedure Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
   end;
 
+  ItgForwardMessageMethod = interface
+    ['{2E2CBC33-3560-4C29-8D69-D598CDE626DB}']
+    function SetChatId(const AChatId: Int64): ItgForwardMessageMethod; overload;
+    function SetChatId(const AChatId: string): ItgForwardMessageMethod; overload;
+    function SetMessageThreadId(const AMessageThreadId: Int64): ItgForwardMessageMethod;
+    function SetFromChatId(const AChatId: Int64): ItgForwardMessageMethod; overload;
+    function SetFromChatId(const AChatId: string): ItgForwardMessageMethod; overload;
+    function SetDisableNotification(const ADisableNotification: Boolean): ItgForwardMessageMethod;
+    function SetProtectContent(const AProtectContent: Boolean): ItgForwardMessageMethod;
+    function SetMessageId(const AMessageId: Int64): ItgForwardMessageMethod; overload;
+    //
+    procedure Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
+  end;
+
 implementation
 
 end.

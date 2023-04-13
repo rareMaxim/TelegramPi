@@ -111,6 +111,7 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="rtl.dcp"/>
+        <DCCReference Include="fmx.dcp"/>
         <DCCReference Include="TelegaPi.Client.pas"/>
         <DCCReference Include="TelegaPi.Types.pas"/>
         <DCCReference Include="TelegaPi.Core.Methods.pas"/>
@@ -159,7 +160,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\TelegaPi.bpl" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="..\..\..\Public\Documents\Embarcadero\Studio\21.0\Bpl\TelegaPi.bpl" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>TelegaPi.bpl</RemoteName>
                         <Overwrite>true</Overwrite>

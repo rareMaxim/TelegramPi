@@ -63,12 +63,26 @@ type
     procedure Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
   end;
 
+  TtgForwardMessageMethod = class(TtgMethod, ItgForwardMessageMethod)
+  public
+    function SetChatId(const AChatId: Int64): ItgForwardMessageMethod; overload;
+    function SetChatId(const AChatId: string): ItgForwardMessageMethod; overload;
+    function SetMessageThreadId(const AMessageThreadId: Int64): ItgForwardMessageMethod;
+    function SetFromChatId(const AChatId: Int64): ItgForwardMessageMethod; overload;
+    function SetFromChatId(const AChatId: string): ItgForwardMessageMethod; overload;
+    function SetDisableNotification(const ADisableNotification: Boolean): ItgForwardMessageMethod;
+    function SetProtectContent(const AProtectContent: Boolean): ItgForwardMessageMethod;
+    function SetMessageId(const AMessageId: Int64): ItgForwardMessageMethod; overload;
+    //
+    procedure Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
+  end;
+
 implementation
 
 uses
-  FMX.Types,
   System.JSON,
   Citrus.JObject,
+  Citrus.SimpleLog,
   System.Generics.Collections;
 
 { TtgMethod<T> }
@@ -92,21 +106,24 @@ begin
     var
       LRawData: string;
       LResponse: TJSONObject;
+      LNewData: string;
+      LSerialized: TR;
     begin
       LRawData := AHttp.ContentAsString();
       LResponse := TJSONObject.ParseJSONValue(LRawData) as TJSONObject;
       try
         if LResponse.GetValue('ok').Value = 'true' then
         begin
-          var
           LNewData := LResponse.GetValue('result').ToJSON;
-          var
           LSerialized := TJObjectConfig.Current.Serializer.Deserialize<TR>(LNewData);
           AResponse(LSerialized, AHttp);
         end
         else
-          raise Exception.CreateFmt('%s: %s = %s', [FMandarin.GetUrlSegment('METHOD_NAME'),
-            LResponse.GetValue('error_code').Value, LResponse.GetValue('description').Value]);
+          FClient.DoOnLog(TLogInfo.Warn(//
+            Format('%s: %s = %s', [FMandarin.GetUrlSegment('METHOD_NAME'), //
+            LResponse.GetValue('error_code').Value, //
+            LResponse.GetValue('description').Value]), //
+            'Telegram API'));
       finally
         LResponse.Free;
       end;
@@ -115,7 +132,7 @@ end;
 
 function TtgMethod.BuildMandarin(const AMethod: string): IMandarinExt;
 begin
-  Result := FClient.NewMandarin(BOT_URL)//
+  Result := FClient.NewMandarin(BOT_URL) //
     .AddUrlSegment('METHOD_NAME', AMethod);
 end;
 
@@ -265,6 +282,68 @@ end;
 procedure TtgCloseMethod.Excecute(AResponse: TProc<Boolean, IHttpResponse>);
 begin
   InternExec<Boolean>(AResponse);
+end;
+
+{ TtgForwardMessageMethod }
+
+procedure TtgForwardMessageMethod.Excecute(AResponse: TProc<ItgMessage, IHttpResponse>);
+begin
+  InternExec<TtgMessage>(
+    procedure(AData: TtgMessage; AHttp: IHttpResponse)
+    begin
+      if Assigned(AResponse) then
+        AResponse(AData, AHttp)
+      else
+        AData.Free;
+    end);
+end;
+
+function TtgForwardMessageMethod.SetChatId(const AChatId: Int64): ItgForwardMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('chat_id', AChatId.ToString);
+  Result := Self;
+end;
+
+function TtgForwardMessageMethod.SetChatId(const AChatId: string): ItgForwardMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('chat_id', AChatId);
+  Result := Self;
+end;
+
+function TtgForwardMessageMethod.SetDisableNotification(const ADisableNotification: Boolean): ItgForwardMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('disable_notification', ADisableNotification.ToString(TUseBoolStrs.True));
+  Result := Self;
+end;
+
+function TtgForwardMessageMethod.SetFromChatId(const AChatId: Int64): ItgForwardMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('from_chat_id', AChatId.ToString);
+  Result := Self;
+end;
+
+function TtgForwardMessageMethod.SetFromChatId(const AChatId: string): ItgForwardMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('from_chat_id', AChatId);
+  Result := Self;
+end;
+
+function TtgForwardMessageMethod.SetMessageId(const AMessageId: Int64): ItgForwardMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('message_id', AMessageId.ToString);
+  Result := Self;
+end;
+
+function TtgForwardMessageMethod.SetMessageThreadId(const AMessageThreadId: Int64): ItgForwardMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('message_thread_id', AMessageThreadId.ToString);
+  Result := Self;
+end;
+
+function TtgForwardMessageMethod.SetProtectContent(const AProtectContent: Boolean): ItgForwardMessageMethod;
+begin
+  GetMandarin.Body.JSON.AddPair('protect_content', AProtectContent.ToString(TUseBoolStrs.True));
+  Result := Self;
 end;
 
 end.
