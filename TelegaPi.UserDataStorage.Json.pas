@@ -74,8 +74,11 @@ var
   lFileSource: string;
 begin
   FFileName := AFileName;
-  lFileSource := TFile.ReadAllText(AFileName);
-  FSerializer.Populate<TtgUserDataStorage.TData>(lFileSource, FData);
+  if TFile.Exists(AFileName) then
+  begin
+    lFileSource := TFile.ReadAllText(AFileName);
+    FSerializer.Populate<TtgUserDataStorage.TData>(lFileSource, FData);
+  end;
 end;
 
 procedure TtgUserDataStorage.SaveToFile(const AFileName: string);

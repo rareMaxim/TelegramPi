@@ -13,6 +13,8 @@ uses
   Citrus.SimpleLog;
 
 type
+  IHttpResponse = Citrus.Mandarin.IHttpResponse;
+
   TTelegaPiBase = class(TComponent)
   private
     FMandarin: TMandarinClientJson;
@@ -23,7 +25,7 @@ type
     FMessageOffset: Int64;
     FAllowedUpdates: TAllowedUpdates;
     FLimitUpdates: Integer;
-    procedure DoWorkWithUpdates(AUpdates: TArray<ItgUpdate>; AHttpResponse: IHTTPResponse);
+    procedure DoWorkWithUpdates(AUpdates: TArray<ItgUpdate>; AHttpResponse: IHttpResponse);
   protected
     procedure EventParser(AUpdates: TArray<ItgUpdate>); virtual;
     procedure TypeUpdate(AUpdate: ItgUpdate); virtual;
@@ -299,7 +301,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TTelegaPiBase.DoWorkWithUpdates(AUpdates: TArray<ItgUpdate>; AHttpResponse: IHTTPResponse);
+procedure TTelegaPiBase.DoWorkWithUpdates(AUpdates: TArray<ItgUpdate>; AHttpResponse: IHttpResponse);
 begin
   if Assigned(AUpdates) and (Length(AUpdates) > 0) then
   begin

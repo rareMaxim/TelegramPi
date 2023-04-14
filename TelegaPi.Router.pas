@@ -55,7 +55,7 @@ type
     // protected
     procedure RouteStart(const AUserID: Int64; AMessage: ItgMessage);
     procedure RouteStop(const AUserID: Int64);
-    procedure SendMessage(AMessage: TtgMessage);
+    procedure SendMessage(AMessage: ItgMessage);
     procedure SendCallbackQuery(AQuery: TtgCallbackQuery);
   public
     class function Create(const AName: string; AAutorunTriggers: TArray<string> = []): TtgRoute; static;
@@ -95,18 +95,18 @@ type
     procedure DoNotifyRouteNotFound(const AId: Int64; const ARouteName: string);
     procedure DoCheckRouteIsExist(const AId: Int64; const ARouteName: string);
     procedure DoOnRouteMove(const AUserID: Int64; const AFrom, ATo: TtgRoute);
-    function DoCheckTrigger(const AUserID: Int64; AMsg: TtgMessage; var ARouteName: string): Boolean;
+    function DoCheckTrigger(const AUserID: Int64; AMsg: ItgMessage; var ARouteName: string): Boolean;
   public
     constructor Create(ARouteUserState: TtgUserDataStorageAbstract; ABot: TTelegaPiBase);
     destructor Destroy; override;
-    procedure MoveTo(const AUserID: Int64; const ARoute: TtgRoute; AMessage: TtgMessage); overload;
-    procedure MoveTo(const AUserID: Int64; const ARouteName: string; AMessage: TtgMessage); overload;
+    procedure MoveTo(const AUserID: Int64; const ARoute: TtgRoute; AMessage: ItgMessage); overload;
+    procedure MoveTo(const AUserID: Int64; const ARouteName: string; AMessage: ItgMessage); overload;
     // регистрируем точку
     procedure RegisterRoute(ARoute: TtgRoute);
     // регистрируем точки
     procedure RegisterRoutes(ARoutes: TArray<TtgRoute>);
     // Уведомляем маршрутизатор о новом сообщении
-    procedure SendMessage(AMessage: TtgMessage);
+    procedure SendMessage(AMessage: ItgMessage);
     procedure SendCallbackQuery(AQuery: TtgCallbackQuery);
 
     // property Routes: TDictionary<string, TtgRoute> read FRoutes write FRoutes;
@@ -160,7 +160,7 @@ begin
     OnCallbackQuery(AQuery);
 end;
 
-procedure TtgRoute.SendMessage(AMessage: TtgMessage);
+procedure TtgRoute.SendMessage(AMessage: ItgMessage);
 begin
   if Assigned(OnMessageCallback) then
     OnMessageCallback(AMessage);
@@ -189,7 +189,7 @@ begin
     DoNotifyRouteNotFound(AId, ARouteName);
 end;
 
-function TtgRouter.DoCheckTrigger(const AUserID: Int64; AMsg: TtgMessage; var ARouteName: string): Boolean;
+function TtgRouter.DoCheckTrigger(const AUserID: Int64; AMsg: ItgMessage; var ARouteName: string): Boolean;
 var
   lRoute: TtgRoute;
 begin
@@ -216,7 +216,7 @@ begin
     OnRouteMove(AUserID, AFrom, ATo);
 end;
 
-procedure TtgRouter.MoveTo(const AUserID: Int64; const ARouteName: string; AMessage: TtgMessage);
+procedure TtgRouter.MoveTo(const AUserID: Int64; const ARouteName: string; AMessage: ItgMessage);
 var
   lRoute: TtgRoute;
 begin
@@ -226,7 +226,7 @@ begin
     raise EArgumentNilException.CreateFmt('Route [%s] not found', [ARouteName]);
 end;
 
-procedure TtgRouter.MoveTo(const AUserID: Int64; const ARoute: TtgRoute; AMessage: TtgMessage);
+procedure TtgRouter.MoveTo(const AUserID: Int64; const ARoute: TtgRoute; AMessage: ItgMessage);
 var
   LCurrentRoute: TtgRoute;
 begin
@@ -274,7 +274,7 @@ begin
   end;
 end;
 
-procedure TtgRouter.SendMessage(AMessage: TtgMessage);
+procedure TtgRouter.SendMessage(AMessage: ItgMessage);
 var
   lRoute: TtgRoute;
   lRouteName: string;
