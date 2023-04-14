@@ -346,7 +346,34 @@ type
   end;
 
   TtgCallbackQuery = class
-
+  private
+    [JsonName('id')]
+    FId: string;
+    [JsonName('from')]
+    FFrom: TTgUser;
+    [JsonName('message')]
+    FMessage: TtgMessage;
+    [JsonName('inline_message_id')]
+    FInlineMessageId: string;
+    [JsonName('chat_instance')]
+    FChatInstance: string;
+    FData: string;
+    FGameShortName: string;
+    function GetChatInstance: string;
+    function GetData: string;
+    function GetFrom: TTgUser;
+    function GetGameShortName: string;
+    function GetId: string;
+    function GetInlineMessageId: string;
+    function GetMessage: TtgMessage;
+  public
+    property Id: string read GetId;
+    property From: TTgUser read GetFrom;
+    property Message: TtgMessage read GetMessage;
+    property InlineMessageId: string read GetInlineMessageId;
+    property ChatInstance: string read GetChatInstance;
+    property Data: string read GetData;
+    property GameShortName: string read GetGameShortName;
   end;
 
   TtgShippingQuery = class
@@ -1538,6 +1565,41 @@ end;
 function TtgMessage.GetWriteAccessAllowed: TtgWriteAccessAllowed;
 begin
   Result := FWriteAccessAllowed;
+end;
+
+function TtgCallbackQuery.GetChatInstance: string;
+begin
+  Result := FChatInstance;
+end;
+
+function TtgCallbackQuery.GetData: string;
+begin
+  Result := FData;
+end;
+
+function TtgCallbackQuery.GetFrom: TTgUser;
+begin
+  Result := FFrom;
+end;
+
+function TtgCallbackQuery.GetGameShortName: string;
+begin
+  Result := FGameShortName;
+end;
+
+function TtgCallbackQuery.GetId: string;
+begin
+  Result := FId;
+end;
+
+function TtgCallbackQuery.GetInlineMessageId: string;
+begin
+  Result := FInlineMessageId;
+end;
+
+function TtgCallbackQuery.GetMessage: TtgMessage;
+begin
+  Result := FMessage;
 end;
 
 end.

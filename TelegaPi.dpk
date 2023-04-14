@@ -37,6 +37,10 @@ contains
   TelegaPi.Core.Methods in 'TelegaPi.Core.Methods.pas',
   TelegaPi.Methods in 'TelegaPi.Methods.pas',
   TelegaPi.Core.Helpers in 'TelegaPi.Core.Helpers.pas',
-  TelegaPi.Keyboard in 'TelegaPi.Keyboard.pas';
+  TelegaPi.Keyboard in 'TelegaPi.Keyboard.pas',
+  TelegaPi.UserDataStorage.Abstract in 'TelegaPi.UserDataStorage.Abstract.pas',
+  TelegaPi.UserDataStorage.Ram in 'TelegaPi.UserDataStorage.Ram.pas',
+  TelegaPi.UserDataStorage.Json in 'TelegaPi.UserDataStorage.Json.pas',
+  TelegaPi.Router in 'TelegaPi.Router.pas';
 
 end.
