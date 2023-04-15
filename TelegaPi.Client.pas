@@ -100,6 +100,7 @@ type
     FOnPreCheckoutQuery: TProc<TtgPreCheckoutQuery>;
     FOnLogMessage: TProc<TLogInfo>;
   protected
+    procedure EventParser(AUpdates: TArray<ItgUpdate>); override;
     procedure DoOnCallbackQuery(ACallbackQuery: TtgCallbackQuery); override;
     procedure DoOnChannelPost(AChannelPost: TTgMessage); override;
     procedure DoOnChosenInlineResult(AChosenInlineResult: TtgChosenInlineResult); override;
@@ -474,6 +475,16 @@ begin
   inherited;
   if Assigned(OnUpdates) then
     OnUpdates(AUpdates);
+end;
+
+procedure TTelegaPiConsole.EventParser(AUpdates: TArray<ItgUpdate>);
+begin
+  if not IsConsole then
+    TThread.Synchronize(nil,
+      procedure
+      begin
+        inherited EventParser(AUpdates);
+      end);
 end;
 
 { TTelegaPi }

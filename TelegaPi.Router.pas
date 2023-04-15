@@ -1,26 +1,24 @@
 ﻿{ *************************************************************************** }
-{ }
-{ TelegaPi }
-{ }
-{ Copyright (C) 2021 Maxim Sysoev }
-{ }
-{ https://t.me/CloudAPI }
-{ }
-{ }
+{                                                                             }
+{                                TelegaPi                                     }
+{                                                                             }
+{                     Copyright (C) 2021 Maxim Sysoev                         }
+{                                                                             }
+{                           https://t.me/CloudAPI                             }
 { *************************************************************************** }
-{ }
-{ Licensed under the Apache License, Version 2.0 (the "License"); }
-{ you may not use this file except in compliance with the License. }
-{ You may obtain a copy of the License at }
-{ }
-{ http://www.apache.org/licenses/LICENSE-2.0 }
-{ }
-{ Unless required by applicable law or agreed to in writing, software }
-{ distributed under the License is distributed on an "AS IS" BASIS, }
-{ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. }
-{ See the License for the specific language governing permissions and }
-{ limitations under the License. }
-{ }
+{                                                                             }
+{ Licensed under the Apache License, Version 2.0 (the "License");             }
+{ you may not use this file except in compliance with the License.            }
+{ You may obtain a copy of the License at                                     }
+{                                                                             }
+{ http://www.apache.org/licenses/LICENSE-2.0                                  }
+{                                                                             }
+{ Unless required by applicable law or agreed to in writing, software         }
+{ distributed under the License is distributed on an "AS IS" BASIS,           }
+{ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.    }
+{ See the License for the specific language governing permissions and         }
+{ limitations under the License.                                              }
+{                                                                             }
 { *************************************************************************** }
 
 unit TelegaPi.Router;
@@ -43,15 +41,15 @@ type
   private
     FName: string;
     FAutorunTriggers: TArray<string>;
-    FOnStartCallback: TProc<Int64, ItgMessage>;
-    FOnMessageCallback: TProc<ItgMessage>;
+    FOnStartCallback: TProc<Int64, TtgRoute, ItgMessage>;
+    FOnMessageCallback: TProc<TtgRoute, ItgMessage>;
     FTagString: string;
     FTagInteger: Integer;
     FTagValue: TValue;
-    FOnStopCallback: TProc<Int64>;
+    FOnStopCallback: TProc<Int64, TtgRoute>;
     FBot: TTelegaPiBase;
     FMessage: ItgMessage;
-    FOnCallbackQuery: TProc<TtgCallbackQuery>;
+    FOnCallbackQuery: TProc<TtgRoute, TtgCallbackQuery>;
     // protected
     procedure RouteStart(const AUserID: Int64; AMessage: ItgMessage);
     procedure RouteStop(const AUserID: Int64);
@@ -70,12 +68,12 @@ type
     property Name: string read FName write FName;
     property AutorunTriggers: TArray<string> read FAutorunTriggers write FAutorunTriggers;
     // Отправляем побуждение к действию
-    property OnStartCallback: TProc<Int64, ItgMessage> read FOnStartCallback write FOnStartCallback;
+    property OnStartCallback: TProc<Int64, TtgRoute, ItgMessage> read FOnStartCallback write FOnStartCallback;
     // Обрабатывапем ответ от пользователя
-    property OnMessageCallback: TProc<ItgMessage> read FOnMessageCallback write FOnMessageCallback;
-    property OnCallbackQuery: TProc<TtgCallbackQuery> read FOnCallbackQuery write FOnCallbackQuery;
+    property OnMessageCallback: TProc<TtgRoute, ItgMessage> read FOnMessageCallback write FOnMessageCallback;
+    property OnCallbackQuery: TProc<TtgRoute, TtgCallbackQuery> read FOnCallbackQuery write FOnCallbackQuery;
     // вызывается при перемещении на следующую точку маршрута. Возможно, лишний колбек.
-    property OnStopCallback: TProc<Int64> read FOnStopCallback write FOnStopCallback;
+    property OnStopCallback: TProc<Int64, TtgRoute> read FOnStopCallback write FOnStopCallback;
     property Bot: TTelegaPiBase read FBot write FBot;
   end;
 
@@ -91,6 +89,10 @@ type
     FCurrentRoute: TtgRoute;
     fOnRouteMove: TProc<Int64, TtgRoute, TtgRoute>;
     FBot: TTelegaPiBase;
+    FOnStartCallback: TProc<Int64, TtgRoute, ItgMessage>;
+    FOnMessageCallback: TProc<TtgRoute, ItgMessage>;
+    FOnCallbackQuery: TProc<TtgRoute, TtgCallbackQuery>;
+    FOnStopCallback: TProc<Int64, TtgRoute>;
   protected
     procedure DoNotifyRouteNotFound(const AId: Int64; const ARouteName: string);
     procedure DoCheckRouteIsExist(const AId: Int64; const ARouteName: string);
@@ -108,6 +110,10 @@ type
     // Уведомляем маршрутизатор о новом сообщении
     procedure SendMessage(AMessage: ItgMessage);
     procedure SendCallbackQuery(AQuery: TtgCallbackQuery);
+    property OnStartCallback: TProc<Int64, TtgRoute, ItgMessage> read FOnStartCallback write FOnStartCallback;
+    property OnMessageCallback: TProc<TtgRoute, ItgMessage> read FOnMessageCallback write FOnMessageCallback;
+    property OnCallbackQuery: TProc<TtgRoute, TtgCallbackQuery> read FOnCallbackQuery write FOnCallbackQuery;
+    property OnStopCallback: TProc<Int64, TtgRoute> read FOnStopCallback write FOnStopCallback;
 
     // property Routes: TDictionary<string, TtgRoute> read FRoutes write FRoutes;
     // Доступ к состояниям пользователей
@@ -145,25 +151,25 @@ end;
 procedure TtgRoute.RouteStart(const AUserID: Int64; AMessage: ItgMessage);
 begin
   if Assigned(OnStartCallback) then
-    OnStartCallback(AUserID, AMessage);
+    OnStartCallback(AUserID, Self, AMessage);
 end;
 
 procedure TtgRoute.RouteStop(const AUserID: Int64);
 begin
   if Assigned(OnStopCallback) then
-    OnStopCallback(AUserID);
+    OnStopCallback(AUserID, Self);
 end;
 
 procedure TtgRoute.SendCallbackQuery(AQuery: TtgCallbackQuery);
 begin
   if Assigned(OnCallbackQuery) then
-    OnCallbackQuery(AQuery);
+    OnCallbackQuery(Self, AQuery);
 end;
 
 procedure TtgRoute.SendMessage(AMessage: ItgMessage);
 begin
   if Assigned(OnMessageCallback) then
-    OnMessageCallback(AMessage);
+    OnMessageCallback(Self, AMessage);
 end;
 
 { TtgRouteManager }
